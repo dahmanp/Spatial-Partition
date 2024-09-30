@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 namespace SpatialPartitionPattern
 {
@@ -29,11 +30,15 @@ namespace SpatialPartitionPattern
         int cellSize = 10;
 
         //Number of soldiers on each team
-        int numberOfSoldiers = 100;
+        public int numberOfSoldiers = 100;
 
         //The Spatial Partition grid
         Grid grid;
 
+        public bool enableSP = false;
+        public TMP_Text timeText;
+        public GameObject spEnabled;
+        public GameObject spDisabled;
 
         void Start()
         {
@@ -73,6 +78,7 @@ namespace SpatialPartitionPattern
 
         void Update()
         {
+            float startTime = Time.realtimeSinceStartup;
             //Move the enemies
             for (int i = 0; i < enemySoldiers.Count; i++)
             {
@@ -94,7 +100,20 @@ namespace SpatialPartitionPattern
                 //Soldier closestEnemy = FindClosestEnemySlow(friendlySoldiers[i]);
 
                 //The fast version with spatial partition
-                Soldier closestEnemy = grid.FindClosestEnemy(friendlySoldiers[i]);
+                Soldier closestEnemy;
+
+                if (enableSP)
+                {
+                    closestEnemy = grid.FindClosestEnemy(friendlySoldiers[i]);
+                    spEnabled.SetActive(true);
+                    spDisabled.SetActive(false);
+                }
+                else
+                {
+                    closestEnemy = FindClosestEnemySlow(friendlySoldiers[i]);
+                    spEnabled.SetActive(false);
+                    spDisabled.SetActive(true);
+                }
 
                 //If we found an enemy
                 if (closestEnemy != null)
@@ -108,6 +127,8 @@ namespace SpatialPartitionPattern
                     friendlySoldiers[i].Move(closestEnemy);
                 }
             }
+            float totalTime = Time.realtimeSinceStartup - startTime;
+            timeText.text = totalTime.ToString();
         }
 
 
@@ -134,6 +155,18 @@ namespace SpatialPartitionPattern
             }
 
             return closestEnemy;
+        }
+
+        public void toggleSP()
+        {
+            if (enableSP == false)
+            {
+                enableSP = true;
+            }
+            else if (enableSP == true)
+            {
+                enableSP = false;
+            }
         }
     }
 }
